@@ -129,4 +129,6 @@ if __name__ == "__main__":
     parser.add_argument("--data_key", "-d", type=str, required=False, help="The key used to identify each data point")
     args = parser.parse_args()
 
+    if not args.data_key:
+        args.data_key = "image_path"
     make_and_send_batch_request(args.input_file, args.step, args.response_key, args.output_file, args.config, args.data_key)
