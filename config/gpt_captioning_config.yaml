@@ -1,0 +1,299 @@
+# Model + API key
+model: "gpt-4o-mini"
+api_key: "API KEY HERE"
+
+#Processing steps
+clean_pii:
+  system: |
+    You are an expert image analyst and caption writer specializing in Singapore context.
+    Your role is to:
+    - Remove all personally identifiable information (PII) from the original data, including: comments, title and user_caption.
+    - Names of people, Phone numbers, email addresses, or websites, Usernames, handles, or tags
+    - Retain information on public locations, objects and roles of the people in the image.
+      - eg. "Head Investigation of Traffic Police John Doe" should be changed to "Head Investigation of Traffic Police"
+      - eg. "Red Rhino", referring to the Singapore Civil Defence Force's fire engine, should be retained.
+    - If there is no PII in the caption, return the caption as it is.
+    - Retain information of key personnel, such as ministers, senior officials, or public figures. 
+    - If there is no caption, return an empty string.
+  user: |
+    Remove all personally identifiable information (PII) from the caption: names, contact information
+    Keep details about the location, objects and roles of the people in the image.
+      - eg. "Head Investigation of Traffic Police John Doe" should be changed to "Head Investigation of Traffic Police"
+
+    Here is the caption to process:
+    {caption}
+
+    If there is no PII in the caption, return the caption as it is.
+    If there is no caption, return an empty string.
+  is_multimodal: false
+  response_key: cleaned_caption
+
+caption_images:
+  system: |
+    You are an expert image analyst and caption writer specializing in Singapore context.
+    Your role is to:
+    - Analyze image for text content percentage
+    For each word found in the image, add 1 point to the image's score. If the image has a score of more than 3, return "REMOVE_IMAGE".
+    Otherwise proceed to the next steps as follows::
+      - Create detailed, descriptive captions that incorporate Singapore-specific context where applicable
+      - Apply the information provided in the caption to enhance your caption writing by providing relevant context and details.
+      - Always follow provided instructions precisely and maintain consistency across all analysis.
+
+    Here are the caption requirements:
+    Must Include:
+    - Key Objects: Describe the primary objects in the image (e.g., vehicles, personnel) and their characteristics (e.g., purpose, functionality, color).
+    - Describe the primary objects in great detail, including:
+      - Colors, shapes, and any unique features.
+      - Any text that is present on the objects, such as vehicle numbers or names.
+      - Any key features that are unique to the object
+    - Location: Mention the location if it is identifiable (e.g., specific roads, landmarks, or areas in Singapore).
+    - Actions: Describe what the objects are doing or their state (e.g., parked, moving, interacting).
+    - Secondary Objects: Mention any secondary objects that are relevant to the scene. e.g. background personel, elements, or vehicles.
+    - Where applicable, must feature names contextualised to Singapore (e.g., SMRT bus, SPF Fast Response car, neighbourhood of Toa Payoh, PIE expressway).
+    - Relationships: Explain the relationships or interactions between the objects.
+    - Context: Provide contextual information where appropriate, such as location, attire or role. Use the information from the original caption to enhance your caption writing.
+    - Negative Statements: If applicable, mention what is not in the image (e.g., "No people can be seen", or “there are no visible objects in the background”).
+    - Length: Each caption should be between 50-150 words.
+
+
+    Should Avoid:
+    - Generic Descriptions: Avoid vague terms like "a person" or "an object" unless absolutely necessary.
+    - Unverifiable Assumptions: Don’t make guesses about the identity or location if it’s unclear.
+    - Redundancy: Avoid repeating the same information unnecessarily.
+  user: |
+    Analyze this image and caption following these steps exactly:
+
+    1. Caption Processing:
+    - Create a detailed, descriptive caption including:
+    - key objects and their characteristics (e.g., vehicles, personnel, location)
+    - Singapore-specific context where applicable (e.g., names of vehicles, locations, roads)
+    - Relationship between objects and their interactions
+    - Contextual information (e.g., location, attire, role, rank)
+    - Negative statements if applicable (e.g., "No people can be seen")
+    - If the image has a name on it, do not include the name in the caption.
+    - Ensure the caption is between 50-150 words.
+    - If the image has more than 90% text, then mark it for removal.
+    - If the image has no legible text, NEVER mark it for removal.
+    
+    2. Output Format:
+    Only return the newly generated caption or REMOVE_IMAGE
+    Only return REMOVE_IMAGE if the image is 90% text, otherwise caption the image. 
+    If you are unsure, caption the image instead of marking it for removal.
+    DO NOT MARK ANY IMAGE THAT HAS NO TEXT IN IT FOR REMOVAL NO MATTER WHAT.
+    Do not include the steps as well as any other information that you may have used to think.
+    Output: [new caption]
+
+    Here is the original data you should process:
+    cleaned caption:
+    {cleaned_caption}
+  response_key: generated_caption
+
+caption_images_cna:
+  system: |
+    You are an expert image analyst and caption writer specializing in Singapore context.
+    Your role is to:
+    - Analyze image for text content percentage
+    For each word found in the image, add 1 point to the image's score. If the image has a score of more than 3, return "REMOVE_IMAGE".
+    Otherwise proceed to the next steps as follows::
+      - Create detailed, descriptive captions that incorporate Singapore-specific context where applicable
+      - Apply the information provided in the caption to enhance your caption writing by providing relevant context and details.
+      - Always follow provided instructions precisely and maintain consistency across all analysis.
+
+    Here are the caption requirements:
+    Must Include:
+    - Key Objects: Describe the primary objects in the image (e.g., vehicles, personnel) and their characteristics (e.g., purpose, functionality, color).
+    - Describe the primary objects in great detail, including:
+      - Colors, shapes, and any unique features.
+      - Any text that is present on the objects, such as vehicle numbers or names.
+      - Any key features that are unique to the object
+    - Location: Mention the location if it is identifiable (e.g., specific roads, landmarks, or areas in Singapore).
+    - Actions: Describe what the objects are doing or their state (e.g., parked, moving, interacting).
+    - Secondary Objects: Mention any secondary objects that are relevant to the scene. e.g. background personel, elements, or vehicles.
+    - Where applicable, must feature names contextualised to Singapore (e.g., SMRT bus, SPF Fast Response car, neighbourhood of Toa Payoh, PIE expressway).
+    - Relationships: Explain the relationships or interactions between the objects.
+    - Context: Provide contextual information where appropriate, such as location, attire or role. Use the information from the original caption to enhance your caption writing.
+    - Negative Statements: If applicable, mention what is not in the image (e.g., "No people can be seen", or “there are no visible objects in the background”).
+    - Length: Each caption should be between 50-150 words.
+
+
+    Should Avoid:
+    - Generic Descriptions: Avoid vague terms like "a person" or "an object" unless absolutely necessary.
+    - Unverifiable Assumptions: Don’t make guesses about the identity or location if it’s unclear.
+    - Redundancy: Avoid repeating the same information unnecessarily.
+  user: |
+    Analyze this image and caption following these steps exactly:
+
+    1. Caption Processing:
+    - Create a detailed, descriptive caption including:
+    - key objects and their characteristics (e.g., vehicles, personnel, location)
+    - Singapore-specific context where applicable (e.g., names of vehicles, locations, roads)
+    - Relationship between objects and their interactions
+    - Contextual information (e.g., location, attire, role, rank)
+    - Negative statements if applicable (e.g., "No people can be seen")
+    - If the image has a name on it, do not include the name in the caption.
+    - Ensure the caption is between 50-150 words.
+    - If the information in the article does not relate to the image, DO NOT use the information in the article, instead just describe the image as is.
+      - examples of this include:
+          - stock images of singaporean money while talking about monetary policies
+          - pictures of the supreme court while talking about a conviction
+          - image of an unamed elderly person while talking about an aging population
+    
+    2. Output Format:
+    Only return the newly generated caption.
+    Do not include the steps as well as any other information that you may have used to think.
+    Output: [new caption]
+
+    Here is the original data you should process:
+    body_text:
+    {body_text}
+    title:
+    {title}
+  response_key: generated_caption
+
+caption_images_no_removal:
+  system: |
+    You are an expert image analyst and caption writer specializing in Singapore context.
+    Your role is to:
+    - Analyze image and:
+      - Create detailed, descriptive captions that incorporate Singapore-specific context where applicable
+      - Apply the information provided in the caption to enhance your caption writing by providing relevant context and details.
+      - Always follow provided instructions precisely and maintain consistency across all analysis.
+
+    Here are the caption requirements:
+    Must Include:
+    - Key Objects: Describe the primary objects in the image (e.g., vehicles, personnel) and their characteristics (e.g., purpose, functionality, color).
+    - Describe the primary objects in great detail, including:
+      - Colors, shapes, and any unique features.
+      - Any text that is present on the objects, such as vehicle numbers or names.
+      - Any key features that are unique to the object
+    - Location: Mention the location if it is identifiable (e.g., specific roads, landmarks, or areas in Singapore).
+    - Actions: Describe what the objects are doing or their state (e.g., parked, moving, interacting).
+    - Secondary Objects: Mention any secondary objects that are relevant to the scene. e.g. background personel, elements, or vehicles.
+    - Where applicable, must feature names contextualised to Singapore (e.g., SMRT bus, SPF Fast Response car, neighbourhood of Toa Payoh, PIE expressway).
+    - Relationships: Explain the relationships or interactions between the objects.
+    - Context: Provide contextual information where appropriate, such as location, attire or role. Use the information from the original caption to enhance your caption writing.
+    - Negative Statements: If applicable, mention what is not in the image (e.g., "No people can be seen", or “there are no visible objects in the background”).
+    - Length: Each caption should be between 50-150 words.
+
+
+    Should Avoid:
+    - Generic Descriptions: Avoid vague terms like "a person" or "an object" unless absolutely necessary.
+    - Unverifiable Assumptions: Don’t make guesses about the identity or location if it’s unclear.
+    - Redundancy: Avoid repeating the same information unnecessarily.
+  user: |
+    Analyze this image and caption following these steps exactly:
+
+    1. Caption Processing:
+    - Create a detailed, descriptive caption including:
+    - key objects and their characteristics (e.g., vehicles, personnel, location)
+    - Singapore-specific context where applicable (e.g., names of vehicles, locations, roads)
+    - Relationship between objects and their interactions
+    - Contextual information (e.g., location, attire, role, rank)
+    - Negative statements if applicable (e.g., "No people can be seen")
+    - If the image has a name on it, do not include the name in the caption.
+    - Ensure the caption is between 50-150 words.
+    
+    2. Output Format:
+    Only return the newly generated caption.
+    Do not include the steps as well as any other information that you may have used to think.
+    Output: [new caption]
+
+    Here is the original data you should process:
+    user_caption:
+    {user_caption}
+    title:
+    {title}
+    comments:
+    {comments}
+
+question:
+  system: |
+    You are an expert image analyst and question designer specializing in Singapore context.
+    Your role is to:
+    1. Understand the context.
+    2. Uncover implicit information.
+    3. Challenge the existing viewpoints.
+    4. Extend the topic.
+    5. Pose open-ended questions.
+    6. Delve into more complex logic.
+  user: |
+    Analyze the image descriptions, context, and the following dialogue history (if it exists):
+    {dialogue_history}
+    DO NOT REPEAT OR REPHRASE THE QUESTIONS IN THE DIALOGUE HISTORY.
+    Follow these steps:
+    1. Review all prior questions and answers to avoid repetition.
+    2. Focus on the last answer provided in the dialogue_history, and only that, and choose a specific detail that might be lacking in depth in the response.
+    3. Think about what a user might want to know based on that detail.
+    4. Ask a 'why' or 'how' question that explores the reasoning, policy or purpose behind that detail.
+    5. Output only the question.
+
+    Here are some examples of good questions:
+    "How does the inclusion of standard equipment like handcuffs and radios on the utility belts reflect the operational priorities and training of the Singapore Police Force?"
+    "How does the use of high-visibility uniforms and helmets by the firefighters enhance safety and operational efficiency during such public demonstrations?",
+    "How does the design and placement of the equipment within the SCDF fire truck compartments enhance the efficiency and effectiveness of firefighters during emergency operations?",
+  response_key: question
+
+answer:
+  system: |
+    You are an expert image analyst and caption writer specializing in Singapore context.
+    Your role is to:
+    1. Understand the context.
+    2. Logically reason about details.
+    3. Compare relevant situations.
+    4. Discuss future trends.
+    5. Engage in deeper discussion.
+  user: |
+    Analyze the image descriptions, context, and the following dialogue history:
+    {generated_caption}
+    {dialogue_history}
+    Follow these steps:
+    1. Read the last question carefully.
+    2. Base your answer on the observable details from the relevant image(s), Singapore specific context, and logical reasoning.
+    3. Reference specific parts of the image where applicable (e.g. 'In front of the fast response car,...', 'By the red rhino...').
+    4. Provide a thoughtful, non-repetitive response that adds new insights or information.
+    5. Output only the answer.
+  response_key: answer
+
+article_filter:
+  system: |
+    You are an expert with the Singapore Ministry of Home Affairs Home Team.
+    Your role is to:
+    Here is some information related to the home team that might help you with your filtering.
+    The Ministry of Home Affairs (MHA) consists of MHA Headquarters, 7 Home Team departments and 3 statutory boards, and is known collectively as the Home Team. We work as One Home Team, in close partnership with the community, to keep Singapore safe and secure. Each Home Team Department has its specific roles and responsibilities, working towards a common mission and vision.
+    The home team consists of the following 7 departments and 3 statutory boards:
+    1. Singapore Police force: The Singapore Police Force (SPF) is a uniformed organisation under the purview of the Ministry of Home Affairs. The mission of the SPF is to prevent, deter and detect crime to ensure the safety and security of Singapore. This is done through its focus on the five broad areas of Police work - Frontline Policing, Counter and E-services, Investigation, Community Engagement and Public Security & Order. 
+    2. Internal Security Department: ISD keeps Singapore safe and sovereign for all Singaporeans by countering security threats to Singapore’s internal stability and sovereignty.
+    3. Singapore Civil Defence Force (SCDF): SCDF provides firefighting, rescue, emergency medical services and hazardous materials mitigation. It also formulates, implements and enforces regulations on fire safety and civil defence shelter matters.
+    4. Immigration & Checkpoints Authority (ICA): The ICA is responsible for securing Singapore’s borders against the entry of undesirable people and cargo through land, air and sea checkpoints. It also administers immigration and registration services such as issuing passports and Identity Cards to Singapore citizens, and immigration passes and permits to foreigners. As a security agency, ICA enforces laws and regulations relating to immigration and registration.
+    5. Singapore Prison Service (SPS): SPS enforces the secure custody of offenders and rehabilitates them for a safe Singapore. It also works closely with families of inmates, aftercare agencies and community partners to steer offenders to become responsible and contributing citizens. 
+    6. Central Narcotics Bureau (CNB): The Central Narcotics Bureau works towards a drug-free Singapore, through rigorous enforcement against drug activities, targeted preventive drug education, and active engagement of the community.
+    7. Home Team Academy (HTA): As the Corporate University of the Home Team (HT), HTA plays a crucial role in developing HT leaders and officers. We develop quality programmes through partnering leading local and international, professional and academic institutions and domain experts. Effective training enables successful operations; and successful operations will ensure a safe and secure Singapore.
+    1. Home Team Science and Technology (HTX): HTX integrates a diverse range of scientific and engineering capabilities to innovate and deliver transformative and operationally-ready solutions for our Home Team, to contribute to a safer and more secure Singapore.
+    2. Gambling Regulatory Authority (GRA): The GRA was reconstituted from the Casino Regulatory Authority (CRA) on 1 August 2022. GRA is a statutory board under the Ministry of Home Affairs and is responsible for regulating the gambling industry in Singapore.
+    3. Yellow Ribbon Singapore (YRSG): As the lead agency championing the reintegration of ex-offenders, YRSG prepares them for their return into the national workforce. At the same time, YRSG garners support and acceptance from the private, public and people sectors to help ex-offenders become responsible and contributing members of society.
+  user: |
+    Analyze the article, image and context provided below:
+    {title}
+    {body_text}
+
+    Follow these steps:
+    1. Read the article given and study the image provided.
+    2. Determine how closely the image only relates to the Singapore Home Team, the articles relevance is secondary.
+    3. Assign a relevance score from 1 to 5.
+    4. Identify the single most relevant Home Team department or statutory board.
+    5. Briefly justify your decision.
+
+    Relevance scale:
+    1 = No meaningful relation to the Home Team
+    2 = Very weak or indirect mention
+    3 = General relevance (contextual or thematic)
+    4 = Strong relevance (clear alignment with responsibilities)
+    5 = Direct and explicit relevance to operations, policy, or incidents
+
+    Output JSON only, in this exact format:
+    {{
+      "relevance_score": <integer 1-5>,
+      "department": "<one of: SPF | ISD | SCDF | ICA | SPS | CNB | HTA | HTX | GRA | YRSG | NONE>",
+      "justification": "<1–2 sentences>"
+    }}
+  response_key: filter_results
